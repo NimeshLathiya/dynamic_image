@@ -1,0 +1,2751 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Menu Editor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        color: #fff;
+        overflow: hidden;
+        height: 100vh;
+      }
+      /* * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Roboto", sans-serif;
+        background: linear-gradient(135deg, #5e60ce 0%, #7209b7 100%);
+        overflow: hidden;
+        color: #333;
+      } */
+
+      .main-container {
+        display: flex;
+        height: 100vh;
+        position: relative;
+      }
+
+      .editor-panel {
+        width: clamp(300px, 20vw, 400px);
+        background: #ffffff;
+        box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+        overflow-x: hidden;
+        overflow-y: auto;
+        transition: transform 0.3s ease;
+        z-index: 100;
+        position: relative;
+        left: 0;
+      }
+
+      .editor-panel.hidden {
+        transform: translateX(-100%);
+      }
+
+      .editor-panel::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .editor-panel::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      .editor-panel::-webkit-scrollbar-thumb {
+        background: #4361ee;
+        border-radius: 3px;
+      }
+
+      .panel-header {
+        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        color: white;
+        padding: 15px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        text-align: center;
+      }
+
+      .panel-header h1 {
+        font-size: 20px;
+        margin-bottom: 5px;
+      }
+
+      .panel-content {
+        /* padding: 15px; */
+      }
+
+      .control-section {
+        background: #f8f9ff;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border: 1px solid #e7e9ff;
+        transition: all 0.2s ease;
+      }
+
+      .control-section:hover {
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+        transform: translateY(-2px);
+      }
+
+      .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .section-title i {
+        color: #ffffff;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #d3cfcf;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      input[type="color"],
+      select,
+      textarea {
+        width: 100%;
+        padding: 8px;
+        border: 2px solid #dee2e6;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.3s;
+        background: white;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 70px;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 10px;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .btn-primary {
+        background: #4361ee;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #3a0ca3;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: white;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #5a6268;
+      }
+
+      .btn-danger {
+        background: #f72585;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #d0004f;
+      }
+
+      .btn-success {
+        background: #28a745;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #218838;
+        transform: translateY(-2px);
+      }
+
+      .btn-warning {
+        background: #ffc107;
+        color: #212529;
+      }
+
+      .btn-warning:hover {
+        background: #e0a800;
+      }
+
+      .toggle-btn {
+        position: fixed;
+        left: 250px;
+        top: 3px;
+        width: 40px;
+        height: 40px;
+        background: #4361ee;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        z-index: 200;
+        transition: all 0.3s;
+      }
+
+      .toggle-btn:hover {
+        background: #3a0ca3;
+        transform: scale(1.1);
+      }
+
+      .toggle-btn.shifted {
+        left: calc(clamp(300px, 20vw, 400px) + 15px);
+      }
+
+      .canvas-wrapper {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      canvas {
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+        border: 2px solid #4361ee;
+      }
+
+      .color-input-wrapper {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .color-input-wrapper input[type="color"] {
+        width: 50px;
+        height: 40px;
+        border: 2px solid #dee2e6;
+        border-radius: 6px;
+        padding: 2px;
+      }
+
+      .button-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .status-message {
+        padding: 10px;
+        border-radius: 6px;
+        margin-top: 10px;
+        font-size: 13px;
+        text-align: center;
+        display: none;
+      }
+
+      .status-message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+      }
+
+      .status-message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+      }
+
+      .drag-drop-area {
+        border: 2px dashed #4361ee;
+        border-radius: 6px;
+        padding: 0px;
+        text-align: center;
+        margin-top: 10px;
+        background: #f8f9ff;
+        font-size: 12px;
+        color: white;
+      }
+
+      .drag-drop-area.dragover {
+        background: #e7f3ff;
+        border-color: #3a0ca3;
+      }
+
+      .mt-1 {
+        margin-top: 5px;
+      }
+      .mt-2 {
+        margin-top: 10px;
+      }
+      .mt-3 {
+        margin-top: 15px;
+      }
+      .mt-4 {
+        margin-top: 20px;
+      }
+      .mt-5 {
+        margin-top: 25px;
+      }
+
+      .mb-1 {
+        margin-bottom: 5px;
+      }
+      .mb-2 {
+        margin-bottom: 10px;
+      }
+      .mb-3 {
+        margin-bottom: 15px;
+      }
+      .mb-4 {
+        margin-bottom: 20px;
+      }
+      .mb-5 {
+        margin-bottom: 25px;
+      }
+
+      .pb-1 {
+        padding-bottom: 25px;
+      }
+      .pb-2 {
+        padding-bottom: 25px;
+      }
+      .pb-3 {
+        padding-bottom: 25px;
+      }
+      .pb-4 {
+        padding-bottom: 25px;
+      }
+      .pb-5 {
+        padding-bottom: 25px;
+      }
+
+      /* Glassmorphism Sidebar */
+      .editor-panel {
+        width: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+        transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+      .panel-header {
+        background: rgba(67, 97, 238, 0.3);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .control-section {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        margin: 12px;
+        padding: 18px;
+        transition: all 0.3s ease;
+      }
+      .control-section:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(67, 97, 238, 0.2);
+      }
+
+      /* Modern Inputs & Buttons */
+      input,
+      select,
+      textarea,
+      button {
+        font-family: inherit;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+      }
+      input[type="text"],
+      input[type="number"],
+      input[type="color"],
+      select,
+      textarea {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #000000;
+        padding: 10px 14px;
+      }
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+      }
+
+      .btn {
+        background: linear-gradient(135deg, #4361ee, #3a0ca3);
+        border: none;
+        padding: 12px 20px;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+        transition: all 0.3s ease;
+      }
+      .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(67, 97, 238, 0.6);
+      }
+      .btn-success {
+        background: linear-gradient(135deg, #28a745, #218838);
+      }
+      .btn-danger {
+        background: linear-gradient(135deg, #f72585, #d0004f);
+      }
+
+      /* Drag Drop Area */
+      .drag-drop-area {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px dashed rgba(67, 97, 238, 0.6);
+        border-radius: 16px;
+        padding: 15px;
+        text-align: center;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+      .drag-drop-area.dragover {
+        background: rgba(67, 97, 238, 0.2);
+        border-color: #4361ee;
+        transform: scale(1.02);
+      }
+
+      /* Toggle Button - Floating */
+      .toggle-btn {
+        left: 250px !important;
+        top: 7px;
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #4361ee, #3a0ca3);
+        border: none;
+        border-radius: 50%;
+        font-size: 18px;
+        box-shadow: 0 8px 25px rgba(67, 97, 238, 0.5);
+        z-index: 200;
+      }
+      .toggle-btn:hover {
+        transform: scale(1.1) rotate(90deg);
+      }
+
+      /* Canvas Glow */
+      canvas {
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        border: 2px solid rgba(67, 97, 238, 0.4);
+        transition: all 0.4s ease;
+      }
+      canvas:hover {
+        box-shadow: 0 25px 60px rgba(67, 97, 238, 0.4);
+      }
+
+      /* Top Toolbar - Yodeck Style */
+      #topToolbar {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(15, 15, 35, 0.85);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(67, 97, 238, 0.5);
+        border-radius: 20px;
+        padding: 14px 24px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        z-index: 1500;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 15px;
+        animation: slideDown 0.4s ease-out;
+        min-width: 500px;
+        max-width: 95vw;
+        overflow-x: auto;
+        color: #000000;
+      }
+      #topToolbar button {
+        background: rgba(67, 97, 238, 0.6);
+        border: none;
+        padding: 8px 12px;
+        border-radius: 10px;
+        color: white;
+        font-weight: 600;
+      }
+      #topToolbar button:hover {
+        background: #4361ee;
+      }
+      #topToolbar input,
+      #topToolbar select {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      /* Neon Selection */
+      /* .fabric-selection-neon {
+        border: 2px solid #4361ee !important;
+        box-shadow: 0 0 20px #4361ee, 0 0 40px rgba(67, 97, 238, 0.6) !important;
+      } */
+
+      /* Dark Mode Toggle */
+      #darkModeToggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 200;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-container">
+      <button class="toggle-btn" id="toggleBtn" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="editor-panel" id="editorPanel">
+        <div class="panel-header">
+          <h1><i class="fas fa-palette"></i> Menu Editor</h1>
+          <p>Create and customize your menu</p>
+        </div>
+
+        <div class="panel-content">
+          <!-- Text Editing -->
+          <div class="control-section">
+            <div class="section-title">
+              <i class="fas fa-edit"></i> Text Editor
+            </div>
+            <!-- Text editing moved to properties popup. Sidebar text editor hidden. -->
+            <p style="color: white; font-size: 13px">
+              Text editing is available in the Properties popup when you select
+              a text object.
+            </p>
+          </div>
+
+          <div class="control-section">
+            <div class="section-title">
+              <i class="fas fa-plus"></i> Add Menu Items
+            </div>
+            <button class="btn btn-primary" onclick="addItemNamePrice()">
+              <i class="fas fa-utensils"></i> Add Item + Price
+            </button>
+            <button class="btn btn-primary" onclick="addItemNamePriceDesc()">
+              <i class="fas fa-list"></i> Add Item + Price + Desc
+            </button>
+          </div>
+
+          <!-- Font Styling -->
+          <!-- <div class="control-section">
+            <div class="section-title">
+              <i class="fas fa-font"></i> Typography
+            </div>
+            <label>Font Family</label>
+            <select id="fontFamily" class="mb-2">
+              <option value="Roboto">Roboto</option>
+              <option value="Arial">Arial</option>
+              <option value="Helvetica">Helvetica</option>
+              <option value="Times New Roman">Times New Roman</option>
+              <option value="Georgia">Georgia</option>
+            </select>
+            <label>Font Size</label>
+            <input
+              type="number"
+              id="fontSize"
+              min="8"
+              max="100"
+              value="20"
+              class="mb-2"
+            />
+            <label>Font Weight</label>
+            <select id="fontWeight">
+              <option value="normal">Normal</option>
+              <option value="bold">Bold</option>
+              <option value="900">Heavy</option>
+            </select>
+            
+          </div> -->
+
+          <!-- Background Settings -->
+          <div class="control-section">
+            <div class="section-title">
+              <i class="fas fa-image"></i> Background
+            </div>
+            <label class="mb-2">Background Color</label>
+            <div class="color-input-wrapper mb-3">
+              <input type="color" id="bgColor" value="#ffffff" />
+              <input type="text" id="bgColorText" value="#ffffff" readonly />
+            </div>
+            <!-- Background applies immediately on change. Use the color picker or choose an image file. -->
+            <label class="mb-1">Background Image</label>
+            <input type="file" id="bgImage" accept="image/*" />
+          </div>
+
+          <!-- Image Upload and Drag-Drop -->
+          <div class="control-section">
+            <div class="section-title">
+              <i class="fas fa-image"></i> Add Image
+            </div>
+            <label class="mb-2">Upload Image</label>
+            <input type="file" id="uploadImage" accept="image/*" />
+            <div class="drag-drop-area mb-2" id="dragDropArea">
+              Drag and drop images here
+            </div>
+            <p style="color: white; font-size: 13px">
+              Select an image file to automatically add it to the canvas.
+            </p>
+          </div>
+
+          <!-- Video Upload and Drag-Drop -->
+          <div class="control-section">
+            <div class="section-title">
+              <i class="fas fa-video"></i> Add Video
+            </div>
+            <label class="mb-2">Upload Video</label>
+            <input
+              type="file"
+              id="uploadVideo"
+              accept="video/mp4,video/webm"
+              multiple
+            />
+            <div class="drag-drop-area mb-2" id="videoDragDropArea">
+              Drag and drop videos here
+            </div>
+            <p style="color: white; font-size: 13px">
+              Select one or more videos to automatically add them to the canvas.
+            </p>
+            <!-- Play/Pause Button -->
+            <div style="display: flex; gap: 8px; margin-top: 8px">
+              <button
+                class="btn btn-success"
+                id="playButton"
+                onclick="togglePlay()"
+                style="display: none; flex: 1"
+              >
+                <i class="fas fa-play"></i> Play
+              </button>
+              <button
+                class="btn btn-success"
+                id="playAllButton"
+                onclick="playAll()"
+                style="display: none; flex: 1"
+              >
+                <i class="fas fa-play-circle"></i> Play All
+              </button>
+              <button
+                class="btn btn-secondary"
+                id="pauseAllButton"
+                onclick="pauseAll()"
+                style="display: none; flex: 1"
+              >
+                <i class="fas fa-pause-circle"></i> Pause All
+              </button>
+            </div>
+            <!-- Status/Error Message (video-specific) -->
+            <div
+              id="videoStatusMessage"
+              style="margin-top: 10px; color: red"
+            ></div>
+            <!-- Preview Button -->
+            <button
+              class="btn btn-success mt-2"
+              onclick="showPreview()"
+              style="display: none"
+              id="previewButton"
+            >
+              <i class="fas fa-eye"></i> Preview
+            </button>
+          </div>
+
+          <!-- Copy, Paste, Delete -->
+          <!-- <div class="control-section">
+            <div class="section-title">
+              <i class="fas fa-copy"></i> Clipboard
+            </div>
+            <div class="button-group">
+              <button class="btn btn-primary" onclick="copySelected()">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+              <button class="btn btn-secondary" onclick="pasteObject()">
+                <i class="fas fa-paste"></i> Paste
+              </button>
+              <button class="btn btn-danger" onclick="deleteSelected()">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </div> -->
+
+          <!-- Save and Load -->
+          <div class="control-section">
+            <div class="section-title">
+              <i class="fas fa-save"></i> Save/Load
+            </div>
+            <label class="mb-2">Design Name</label>
+            <input
+              type="text"
+              id="designName"
+              placeholder="Enter design name"
+            />
+            <button class="btn btn-primary mb-4" onclick="saveDesign()">
+              <i class="fas fa-download"></i> Save as JSON
+            </button>
+            <!-- <div class="mb-2"> </div> -->
+            <input type="file" id="loadJSON" accept=".json" />
+            <button class="btn btn-primary" onclick="loadDesign()">
+              <i class="fas fa-upload"></i> Load JSON
+            </button>
+            <div id="statusMessage" class="status-message"></div>
+          </div>
+
+          <!-- <div class="control-section">
+            <div class="section-title">
+              <i class="fas fa-history"></i> History
+            </div>
+            <div class="button-group">
+              <button class="btn btn-warning" onclick="undo()">
+                <i class="fas fa-undo"></i> Undo
+              </button>
+              <button class="btn btn-warning" onclick="redo()">
+                <i class="fas fa-redo"></i> Redo
+              </button>
+            </div>
+          </div> -->
+
+          <!-- <div class="control-section">
+            <div class="section-title">
+              <i class="fas fa-copy"></i> Clipboard
+            </div>
+            <div class="button-group">
+              <button class="btn btn-primary" onclick="copySelected()">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+              <button class="btn btn-secondary" onclick="pasteObject()">
+                <i class="fas fa-paste"></i> Paste
+              </button>
+              <button class="btn btn-danger" onclick="deleteSelected()">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </div> -->
+
+          <div class="control-section">
+            <div class="section-title">
+              <i class="fas fa-download"></i> Export Menu
+            </div>
+            <button class="btn btn-success" onclick="downloadMenu()">
+              <i class="fas fa-file-image"></i> Download Menu as PNG
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Modal -->
+      <div
+        id="previewModal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          z-index: 1000;
+        "
+      >
+        <div
+          style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          "
+        >
+          <canvas
+            id="previewCanvas"
+            style="max-width: 90vw; max-height: 90vh; border: 2px solid #4361ee"
+          ></canvas>
+          <button
+            class="btn btn-danger mt-2"
+            onclick="closePreview()"
+            style="display: block; margin: 0 auto"
+          >
+            <i class="fas fa-times"></i> Close
+          </button>
+        </div>
+      </div>
+
+      <!-- Properties Modal -->
+      <div
+        id="propertiesModal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.6);
+          z-index: 1200;
+        "
+      >
+        <div
+          style="
+            background: #fff;
+            padding: 18px;
+            width: 380px;
+            max-width: 90vw;
+            border-radius: 8px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          "
+        >
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 8px;
+            "
+          >
+            <strong id="propertiesTitle">Properties</strong>
+            <button
+              class="btn btn-danger"
+              onclick="hidePropertiesModal()"
+              style="padding: 6px 10px; font-size: 13px"
+            >
+              Close
+            </button>
+          </div>
+
+          <div id="propertiesContent" style="max-height: 60vh; overflow: auto">
+            <!-- content filled dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <div class="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+      </div>
+    </div>
+
+    <script>
+      // === FULL PREMIUM MODERN JAVASCRIPT SCRIPT (ONLY <script> CONTENT) ===
+      // Paste this entire code inside your <script> tag (replace everything previous)
+
+      let clipboard = null;
+      let history = [];
+      let historyStep = -1;
+      let selectedObjects = [];
+      let currentlyEditingTextbox = null;
+      let topToolbar = null;
+      // let videoElements = [];
+      // let videoObjects = [];
+      // let videoRafId = null;
+      let isDarkMode = true;
+
+      let canvas = new fabric.Canvas("canvas", {
+        width: 800,
+        height: 600,
+        backgroundColor: "#ffffff",
+        selection: true,
+        hoverCursor: "move",
+        preserveObjectStacking: true,
+        selectionBorderColor: "#4361ee",
+        selectionLineWidth: 3,
+        selectionDashArray: [5, 5],
+      });
+
+      // Draggable Toolbar Global Functions
+      function makeDraggable(element) {
+        let pos1 = 0,
+          pos2 = 0,
+          pos3 = 0,
+          pos4 = 0;
+        element.onmousedown = dragMouseDown;
+
+        function dragMouseDown(e) {
+          if (
+            e.target.tagName === "INPUT" ||
+            e.target.tagName === "BUTTON" ||
+            e.target.tagName === "SELECT" ||
+            e.target.closest("button")
+          )
+            return;
+          e = e || window.event;
+          e.preventDefault();
+          pos3 = e.clientX;
+          pos4 = e.clientY;
+          document.onmouseup = closeDragElement;
+          document.onmousemove = elementDrag;
+          element.style.cursor = "grabbing";
+        }
+
+        function elementDrag(e) {
+          e = e || window.event;
+          e.preventDefault();
+          pos1 = pos3 - e.clientX;
+          pos2 = pos4 - e.clientY;
+          pos3 = e.clientX;
+          pos4 = e.clientY;
+          element.style.top = element.offsetTop - pos2 + "px";
+          element.style.left = element.offsetLeft - pos1 + "px";
+          element.style.transform = "none"; // center se hatao
+        }
+
+        function closeDragElement() {
+          document.onmouseup = null;
+          document.onmousemove = null;
+          element.style.cursor = "grab";
+          // Save position
+          localStorage.setItem(
+            "topToolbarPos",
+            JSON.stringify({
+              top: element.style.top,
+              left: element.style.left,
+            })
+          );
+        }
+      }
+
+      // Load saved position on load
+      window.addEventListener("load", () => {
+        const saved = localStorage.getItem("topToolbarPos");
+        if (saved) {
+          const pos = JSON.parse(saved);
+          if (document.getElementById("topToolbar")) {
+            const toolbar = document.getElementById("topToolbar");
+            toolbar.style.top = pos.top;
+            toolbar.style.left = pos.left;
+            toolbar.style.transform = "none";
+          }
+        }
+      });
+
+      // Neon glow on selection
+      // canvas.on("before:render", function () {
+      //   if (canvas.contextContainer) {
+      //     canvas.contextContainer.lineWidth = 4;
+      //     canvas.contextContainer.shadowBlur = 20;
+      //     canvas.contextContainer.shadowColor = "#4361ee";
+      //   }
+      // });
+      // canvas.on("after:render", function () {
+      //   canvas.contextContainer.shadowBlur = 0;
+      // });
+
+      // Resize canvas
+      function initCanvas() {
+        const wrapper =
+          document.querySelector(".canvas-wrapper") || document.body;
+        canvas.setWidth(wrapper.clientWidth - 50);
+        canvas.setHeight(wrapper.clientHeight - 50);
+        canvas.renderAll();
+        initHistory();
+      }
+      window.addEventListener("resize", initCanvas);
+      initCanvas();
+
+      // History system
+      function saveState() {
+        if (historyStep < history.length - 1)
+          history = history.slice(0, historyStep + 1);
+        history.push(JSON.stringify(canvas.toJSON(["isVideo"])));
+        historyStep++;
+        if (history.length > 50) {
+          history.shift();
+          historyStep--;
+        }
+      }
+      function initHistory() {
+        history = [JSON.stringify(canvas.toJSON(["isVideo"]))];
+        historyStep = 0;
+      }
+
+      canvas.on(
+        "object:added object:modified object:removed object:scaling object:rotating",
+        saveState
+      );
+
+      // Dark/Light Mode Toggle
+      if (!document.getElementById("darkModeToggle")) {
+        document.body.insertAdjacentHTML(
+          "beforeend",
+          `<div id="darkModeToggle" style="position:fixed;top:20px;right:20px;z-index:200;background:rgba(255,255,255,0.2);padding:12px;border-radius:50%;cursor:pointer;font-size:22px;backdrop-filter:blur(10px);">🌙</div>`
+        );
+      }
+
+      document.getElementById("darkModeToggle").onclick = () => {
+        isDarkMode = !isDarkMode;
+        document.body.style.background = isDarkMode
+          ? "linear-gradient(135deg, #0f0c29, #302b63, #24243e)"
+          : "linear-gradient(135deg, #667eea, #764ba2)";
+        canvas.setBackgroundColor(
+          isDarkMode ? "#121212" : "#f0f2f5",
+          canvas.renderAll.bind(canvas)
+        );
+        document.getElementById("darkModeToggle").textContent = isDarkMode
+          ? "🌙"
+          : "☀️";
+      };
+
+      canvas.on("object:added", saveState);
+      canvas.on("object:modified", saveState);
+      canvas.on("object:removed", saveState);
+      canvas.on("object:scaling", saveState);
+      canvas.on("object:rotating", saveState);
+
+      // Toggle Sidebar
+      function toggleSidebar() {
+        const panel = document.getElementById("editorPanel");
+        const btn = document.getElementById("toggleBtn");
+        if (panel) panel.classList.toggle("hidden");
+        if (btn) btn.classList.toggle("shifted");
+      }
+
+      // === TOP TOOLBAR - YODECK STYLE (Fixed Top Center, Smooth Open/Close) ===
+      // Create dynamic top toolbar
+
+      function createTopToolbar(objOrArray) {
+        hideTopToolbar();
+        const selected = Array.isArray(objOrArray) ? objOrArray : [objOrArray];
+        const isMulti = selected.length > 1;
+
+        // TEXT only (single or multi)
+        if (selected.every((o) => o.type === "textbox")) {
+          // === TEXT TOOLBAR ===
+          const avg = (prop) =>
+            selected.reduce((a, o) => a + o[prop], 0) / selected.length;
+          let currentX = avg("left");
+          let currentY = avg("top");
+          const avgW =
+            selected.reduce((a, o) => a + o.getScaledWidth(), 0) /
+            selected.length;
+          const avgH =
+            selected.reduce((a, o) => a + o.getScaledHeight(), 0) /
+            selected.length;
+
+          const common = (prop, def) =>
+            selected.every((o) => o[prop] === selected[0][prop])
+              ? selected[0][prop]
+              : def;
+          const font = common("fontFamily", "Inter");
+          const size = common("fontSize", 24);
+          const color = common("fill", "#ffffff");
+          const bold = selected.every((o) => o.fontWeight === "bold");
+          const italic = selected.every((o) => o.fontStyle === "italic");
+          const underline = selected.every((o) => o.underline);
+
+          topToolbar = document.createElement("div");
+          topToolbar.id = "topToolbar";
+          topToolbar.style.cssText = `
+      position:fixed;top:20px;left:50%;transform:translateX(-50%);
+      background:rgba(15,15,35,0.95);backdrop-filter:blur(20px);
+      border:1px solid rgba(67,97,238,0.5);border-radius:20px;
+      padding:14px 24px;box-shadow:0 15px 35px rgba(0,0,0,0.4);
+      z-index:1500;display:flex;align-items:center;gap:16px;
+      font-size:15px;animation:slideDown 0.4s ease-out;
+      min-width:600px;max-width:95vw;overflow-x:auto;color:#fff;
+      font-family:'Inter',sans-serif;user-select:none;transition:none;cursor:grab;
+    `;
+          document.body.appendChild(topToolbar);
+
+          topToolbar.innerHTML = `
+      <span style="font-weight:700;color:#4361ee;">${
+        isMulti ? "Multi Text (" + selected.length + ")" : "Text"
+      }</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span>X:</span><input type="number" id="posX" value="${Math.round(
+          currentX
+        )}" style="width:60px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px;color:#fff;">
+        <span>Y:</span><input type="number" id="posY" value="${Math.round(
+          currentY
+        )}" style="width:60px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px;color:#fff;">
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span>W:</span><input type="number" id="sizeW" value="${Math.round(
+          avgW
+        )}" style="width:60px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px;color:#fff;">
+        <span>H:</span><input type="number" id="sizeH" value="${Math.round(
+          avgH
+        )}" style="width:60px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px;color:#fff;">
+      </div>
+      <select id="fontSel" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px;">
+        <option ${font === "Inter" ? "selected" : ""}>Inter</option>
+        <option ${font === "Roboto" ? "selected" : ""}>Roboto</option>
+        <option ${font === "Montserrat" ? "selected" : ""}>Montserrat</option>
+        <option ${font === "Poppins" ? "selected" : ""}>Poppins</option>
+        <option ${font === "Arial" ? "selected" : ""}>Arial</option>
+      </select>
+      <input type="number" id="fontSize" value="${size}" style="width:50px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px;color:#fff;">
+      <button id="boldBtn" style="background:rgba(67,97,238,0.6);padding:8px 12px;border-radius:10px;${
+        bold ? "opacity:1;font-weight:bold" : ""
+      }">B</button>
+      <button id="italicBtn" style="background:rgba(67,97,238,0.6);padding:8px 12px;border-radius:10px;${
+        italic ? "opacity:1;font-style:italic" : ""
+      }">I</button>
+      <button id="underlineBtn" style="background:rgba(67,97,238,0.6);padding:8px 12px;border-radius:10px;${
+        underline ? "opacity:1;text-decoration:underline" : ""
+      }">U</button>
+      <input type="color" id="textColor" value="${color}">
+      <button id="frontBtn" style="background:rgba(67,97,238,0.6);padding:8px 12px;border-radius:10px;">↑ Front</button>
+      <button id="backBtn" style="background:rgba(67,97,238,0.6);padding:8px 12px;border-radius:10px;">↓ Back</button>
+      <button style="margin-left:auto;background:#f72585;padding:8px 12px;border-radius:10px;">×</button>
+    `;
+
+          const apply = (prop, val) => {
+            selected.forEach((o) => o.set(prop, val));
+            canvas.renderAll();
+            saveState();
+          };
+          const applyPos = (axis) => {
+            const id = axis === "x" ? "posX" : "posY";
+            const current = axis === "x" ? currentX : currentY;
+            const newVal = +document.getElementById(id).value;
+            const delta = newVal - current;
+            selected.forEach(
+              (o) => (o[axis === "x" ? "left" : "top"] += delta)
+            );
+            if (axis === "x") currentX = newVal;
+            else currentY = newVal;
+            selected.forEach((o) => o.setCoords());
+            canvas.renderAll();
+            saveState();
+          };
+          const applySize = () => {
+            const newW = +document.getElementById("sizeW").value;
+            const newH = +document.getElementById("sizeH").value;
+            selected.forEach((o) => {
+              o.scaleX = newW / o.width;
+              o.scaleY = newH / o.height;
+              o.setCoords();
+            });
+            canvas.renderAll();
+            saveState();
+          };
+
+          document.getElementById("posX").oninput = () => applyPos("x");
+          document.getElementById("posY").oninput = () => applyPos("y");
+          document.getElementById("sizeW").oninput = applySize;
+          document.getElementById("sizeH").oninput = applySize;
+          document.getElementById("fontSel").onchange = () =>
+            apply("fontFamily", document.getElementById("fontSel").value);
+          document.getElementById("fontSize").oninput = () =>
+            apply("fontSize", +document.getElementById("fontSize").value);
+          document.getElementById("textColor").oninput = () =>
+            apply("fill", document.getElementById("textColor").value);
+
+          const updateButtons = () => {
+            const b = selected.every((o) => o.fontWeight === "bold");
+            const i = selected.every((o) => o.fontStyle === "italic");
+            const u = selected.every((o) => o.underline);
+            document.getElementById("boldBtn").style.opacity = b ? "1" : "0.6";
+            document.getElementById("italicBtn").style.opacity = i
+              ? "1"
+              : "0.6";
+            document.getElementById("underlineBtn").style.opacity = u
+              ? "1"
+              : "0.6";
+          };
+          updateButtons();
+
+          document.getElementById("boldBtn").onclick = () => {
+            const newB = !selected.every((o) => o.fontWeight === "bold");
+            apply("fontWeight", newB ? "bold" : "normal");
+            updateButtons();
+          };
+          document.getElementById("italicBtn").onclick = () => {
+            const newI = !selected.every((o) => o.fontStyle === "italic");
+            apply("fontStyle", newI ? "italic" : "normal");
+            updateButtons();
+          };
+          document.getElementById("underlineBtn").onclick = () => {
+            const newU = !selected.every((o) => o.underline);
+            apply("underline", newU);
+            updateButtons();
+          };
+          document.getElementById("frontBtn").onclick = () => {
+            selected.forEach((o) => o.bringToFront());
+            canvas.renderAll();
+            saveState();
+          };
+          document.getElementById("backBtn").onclick = () => {
+            selected.forEach((o) => o.sendToBack());
+            canvas.renderAll();
+            saveState();
+          };
+          topToolbar.lastElementChild.onclick = hideTopToolbar;
+
+          // === DRAGGABLE + SAVE POSITION ===
+          makeDraggable(topToolbar);
+          const saved = localStorage.getItem("topToolbarPos");
+          if (saved) {
+            const pos = JSON.parse(saved);
+            topToolbar.style.top = pos.top;
+            topToolbar.style.left = pos.left;
+            topToolbar.style.transform = "none";
+          }
+        }
+        // IMAGE / VIDEO only
+        else if (selected.every((o) => o.type === "image" || o.isVideo)) {
+          // === IMAGE/VIDEO TOOLBAR ===
+          const avg = (prop) =>
+            selected.reduce((a, o) => a + (o[prop] || 0), 0) / selected.length;
+          let currentX = avg("left");
+          let currentY = avg("top");
+          const avgW =
+            selected.reduce((a, o) => a + o.getScaledWidth(), 0) /
+            selected.length;
+          const avgH =
+            selected.reduce((a, o) => a + o.getScaledHeight(), 0) /
+            selected.length;
+          const avgOpacity = selected.every(
+            (o) => o.opacity === selected[0].opacity
+          )
+            ? selected[0].opacity * 100
+            : 100;
+          const avgRotate = selected.every((o) => o.angle === selected[0].angle)
+            ? selected[0].angle
+            : 0;
+          const isLocked = selected.every((o) => o.lockMovementX);
+
+          topToolbar = document.createElement("div");
+          topToolbar.id = "topToolbar";
+          topToolbar.style.cssText = `
+      position:fixed;top:20px;left:50%;transform:translateX(-50%);
+      background:rgba(15,15,35,0.95);backdrop-filter:blur(20px);
+      border:1px solid rgba(67,97,238,0.5);border-radius:20px;
+      padding:14px 24px;box-shadow:0 15px 35px rgba(0,0,0,0.4);
+      z-index:1500;display:flex;align-items:center;gap:16px;
+      font-size:15px;animation:slideDown 0.4s ease-out;
+      min-width:700px;max-width:95vw;overflow-x:auto;color:#fff;
+      font-family:'Inter',sans-serif;user-select:none;transition:none;cursor:grab;
+    `;
+          document.body.appendChild(topToolbar);
+
+          topToolbar.innerHTML = `
+      <span style="font-weight:700;color:#4361ee;">${
+        isMulti
+          ? "Multi Media (" + selected.length + ")"
+          : selected[0].isVideo
+          ? "Video"
+          : "Image"
+      }</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span>X:</span><input type="number" id="posX" value="${Math.round(
+          currentX
+        )}" style="width:60px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px;color:#fff;">
+        <span>Y:</span><input type="number" id="posY" value="${Math.round(
+          currentY
+        )}" style="width:60px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px;color:#fff;">
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span>W:</span><input type="number" id="sizeW" value="${Math.round(
+          avgW
+        )}" style="width:60px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px;color:#fff;">
+        <span>H:</span><input type="number" id="sizeH" value="${Math.round(
+          avgH
+        )}" style="width:60px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px;color:#fff;">
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span>Opacity:</span><input type="range" id="opacity" min="0" max="100" value="${Math.round(
+          avgOpacity
+        )}" style="width:80px;">
+        <span id="opacityVal">${Math.round(avgOpacity)}%</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span>Rotate:</span><input type="range" id="rotate" min="-180" max="180" value="${Math.round(
+          avgRotate
+        )}" style="width:80px;">
+        <span id="rotateVal">${Math.round(avgRotate)}°</span>
+      </div>
+      <button id="flipX" style="background:rgba(67,97,238,0.6);padding:8px 12px;border-radius:10px;">Flip ↔</button>
+      <button id="flipY" style="background:rgba(67,97,238,0.6);padding:8px 12px;border-radius:10px;">Flip ↕</button>
+      <button id="lockBtn" style="background:${
+        isLocked ? "#f72585" : "rgba(67,97,238,0.6)"
+      };padding:8px 12px;border-radius:10px;">${
+            isLocked ? "🔒 Locked" : "🔓 Unlock"
+          }</button>
+      <button id="frontBtn" style="background:rgba(67,97,238,0.6);padding:8px 12px;border-radius:10px;">↑ Front</button>
+      <button id="backBtn" style="background:rgba(67,97,238,0.6);padding:8px 12px;border-radius:10px;">↓ Back</button>
+      <button style="margin-left:auto;background:#f72585;padding:8px 12px;border-radius:10px;">×</button>
+    `;
+
+          const apply = (prop, val) => {
+            selected.forEach((o) => o.set(prop, val));
+            canvas.renderAll();
+            saveState();
+          };
+          const applyPos = (axis) => {
+            const id = axis === "x" ? "posX" : "posY";
+            const current = axis === "x" ? currentX : currentY;
+            const newVal = +document.getElementById(id).value;
+            const delta = newVal - current;
+            selected.forEach(
+              (o) => (o[axis === "x" ? "left" : "top"] += delta)
+            );
+            if (axis === "x") currentX = newVal;
+            else currentY = newVal;
+            selected.forEach((o) => o.setCoords());
+            canvas.renderAll();
+            saveState();
+          };
+          const applySize = () => {
+            const newW = +document.getElementById("sizeW").value;
+            const newH = +document.getElementById("sizeH").value;
+            selected.forEach((o) => {
+              o.scaleX = newW / o.width;
+              o.scaleY = newH / o.height;
+              o.setCoords();
+            });
+            canvas.renderAll();
+            saveState();
+          };
+
+          document.getElementById("posX").oninput = () => applyPos("x");
+          document.getElementById("posY").oninput = () => applyPos("y");
+          document.getElementById("sizeW").oninput = applySize;
+          document.getElementById("sizeH").oninput = applySize;
+          document.getElementById("opacity").oninput = () => {
+            const val = document.getElementById("opacity").value / 100;
+            document.getElementById("opacityVal").textContent =
+              document.getElementById("opacity").value + "%";
+            apply("opacity", val);
+          };
+          document.getElementById("rotate").oninput = () => {
+            const val = +document.getElementById("rotate").value;
+            document.getElementById("rotateVal").textContent = val + "°";
+            apply("angle", val);
+          };
+          document.getElementById("flipX").onclick = () => {
+            selected.forEach((o) => o.set("flipX", !o.flipX));
+            canvas.renderAll();
+            saveState();
+          };
+          document.getElementById("flipY").onclick = () => {
+            selected.forEach((o) => o.set("flipY", !o.flipY));
+            canvas.renderAll();
+            saveState();
+          };
+          document.getElementById("lockBtn").onclick = () => {
+            const newLock = !selected[0].lockMovementX;
+            selected.forEach((o) =>
+              o.set({
+                lockMovementX: newLock,
+                lockMovementY: newLock,
+                lockScalingX: newLock,
+                lockScalingY: newLock,
+                lockRotation: newLock,
+              })
+            );
+            document.getElementById("lockBtn").style.background = newLock
+              ? "#f72585"
+              : "rgba(67,97,238,0.6)";
+            document.getElementById("lockBtn").textContent = newLock
+              ? "🔒 Locked"
+              : "🔓 Unlock";
+            canvas.renderAll();
+            saveState();
+          };
+          document.getElementById("frontBtn").onclick = () => {
+            selected.forEach((o) => o.bringToFront());
+            canvas.renderAll();
+            saveState();
+          };
+          document.getElementById("backBtn").onclick = () => {
+            selected.forEach((o) => o.sendToBack());
+            canvas.renderAll();
+            saveState();
+          };
+          topToolbar.lastElementChild.onclick = hideTopToolbar;
+
+          // === DRAGGABLE + SAVE POSITION ===
+          makeDraggable(topToolbar);
+          const saved = localStorage.getItem("topToolbarPos");
+          if (saved) {
+            const pos = JSON.parse(saved);
+            topToolbar.style.top = pos.top;
+            topToolbar.style.left = pos.left;
+            topToolbar.style.transform = "none";
+          }
+        } else {
+          hideTopToolbar();
+        }
+      }
+
+      function hideTopToolbar() {
+        if (topToolbar) {
+          topToolbar.remove();
+          topToolbar = null;
+        }
+        // if (currentlyEditingTextbox) {
+        //   currentlyEditingTextbox.exitEditing();
+        //   currentlyEditingTextbox = null;
+        // }
+      }
+
+      canvas.on("selection:created", (e) => {
+        if (e.selected) createTopToolbar(e.selected);
+      });
+      canvas.on("selection:updated", (e) => {
+        hideTopToolbar();
+        if (e.selected) createTopToolbar(e.selected);
+      });
+      canvas.on("selection:cleared", hideTopToolbar);
+
+      // canvas.on("selection:cleared", () => {
+      //   selectedObjects = [];
+      //   hideTopToolbar();
+      // });
+
+      // Close on canvas click outside
+      canvas.on("mouse:down", (e) => {
+        if (!e.target) {
+          hideTopToolbar();
+          // Ye line comment kar di → multi-select safe rahega
+          // canvas.discardActiveObject();
+          canvas.requestRenderAll();
+        }
+      });
+
+      canvas.on("text:editing:entered", (e) => {
+        canvas.selection = false;
+        // Toolbar stays open during editing
+      });
+      canvas.on("text:editing:exited", (e) => {
+        canvas.selection = true;
+        if (topToolbar) {
+          // Update font/size inputs if needed
+        }
+      });
+
+      // Background controls
+      function applyBackgroundColor() {
+        const col = document.getElementById("bgColor");
+        if (col)
+          canvas.setBackgroundColor(col.value, canvas.renderAll.bind(canvas));
+      }
+      const bgColEl = document.getElementById("bgColor");
+      if (bgColEl) bgColEl.addEventListener("input", applyBackgroundColor);
+
+      // Background image
+      const bgImageInput = document.getElementById("bgImage");
+      if (bgImageInput) {
+        bgImageInput.addEventListener("change", function () {
+          if (this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              fabric.Image.fromURL(e.target.result, (img) => {
+                canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                  scaleX: canvas.width / img.width,
+                  scaleY: canvas.height / img.height,
+                });
+                saveState();
+              });
+            };
+            reader.readAsDataURL(this.files[0]);
+            this.value = "";
+          }
+        });
+      }
+
+      // === IMAGE UPLOAD & DRAG-DROP (MULTIPLE) ===
+      function addImageToCanvas(file) {
+        if (file.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            fabric.Image.fromURL(e.target.result, (img) => {
+              const scale = Math.min(
+                (canvas.width * 0.6) / img.width,
+                (canvas.height * 0.6) / img.height,
+                1
+              );
+              img.set({
+                left: canvas.width / 2 - (img.width * scale) / 2,
+                top: canvas.height / 2 - (img.height * scale) / 2,
+                scaleX: scale,
+                scaleY: scale,
+                cornerStyle: "circle",
+                borderColor: "#4361ee",
+                cornerColor: "#4361ee",
+              });
+              canvas.add(img);
+              canvas.setActiveObject(img);
+              canvas.renderAll();
+              saveState();
+            });
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      const uploadImageInput = document.getElementById("uploadImage");
+      if (uploadImageInput) {
+        uploadImageInput.multiple = true;
+        uploadImageInput.addEventListener("change", (e) => {
+          for (let file of e.target.files) addImageToCanvas(file);
+          e.target.value = "";
+        });
+      }
+      const dragDropArea = document.getElementById("dragDropArea");
+      if (dragDropArea) {
+        ["dragover", "dragenter"].forEach((ev) =>
+          dragDropArea.addEventListener(ev, (e) => {
+            e.preventDefault();
+            dragDropArea.classList.add("dragover");
+          })
+        );
+        ["dragleave", "drop"].forEach((ev) =>
+          dragDropArea.addEventListener(ev, (e) => {
+            e.preventDefault();
+            dragDropArea.classList.remove("dragover");
+            if (ev === "drop")
+              for (let file of e.dataTransfer.files) addImageToCanvas(file);
+          })
+        );
+      }
+
+      // === VIDEO UPLOAD & DRAG-DROP (MULTIPLE, AUTO-PLAY SINGLE) ===
+      let videoElements = [];
+      let videoObjects = [];
+      let videoRafId = null;
+
+      function addVideoToCanvas(file) {
+        if (file && file.type.startsWith("video/")) {
+          const url = URL.createObjectURL(file);
+          const video = document.createElement("video");
+          video.src = url;
+          video.muted = true;
+          video.loop = true;
+          video.autoplay = true;
+          video.setAttribute("playsinline", "");
+          video.crossOrigin = "anonymous";
+
+          video.onloadedmetadata = () => {
+            video.setAttribute("width", video.videoWidth);
+            video.setAttribute("height", video.videoHeight);
+            const maxW = canvas.width * 0.7;
+            const maxH = canvas.height * 0.7;
+            const scale = Math.min(
+              maxW / video.videoWidth,
+              maxH / video.videoHeight,
+              1
+            );
+            const fabricVid = new fabric.Image(video, {
+              left: canvas.width / 2 - (video.videoWidth * scale) / 2,
+              top: canvas.height / 2 - (video.videoHeight * scale) / 2,
+              scaleX: scale,
+              scaleY: scale,
+              objectCaching: false,
+              cornerStyle: "circle",
+              borderColor: "#4361ee",
+              cornerColor: "#4361ee",
+            });
+            fabricVid.isVideo = true;
+            canvas.add(fabricVid);
+            canvas.setActiveObject(fabricVid);
+            canvas.requestRenderAll();
+            saveState();
+
+            videoElements.push(video);
+            videoObjects.push(fabricVid);
+            video.play().catch((e) => console.error("Video play error:", e));
+            if (!videoRafId) startVideoLoop();
+            updateVideoButtons();
+          };
+
+          video.onerror = () => {
+            document.getElementById("videoStatusMessage").textContent =
+              "Error loading video: " + file.name;
+          };
+        }
+      }
+
+      const uploadVideoInput = document.getElementById("uploadVideo");
+      if (uploadVideoInput) {
+        uploadVideoInput.addEventListener("change", function () {
+          const files = this.files;
+          for (let i = 0; i < files.length; i++) {
+            addVideoToCanvas(files[i]);
+          }
+          this.value = "";
+        });
+      }
+
+      // Video Drag & Drop (multiple)
+      const videoDragDropArea = document.getElementById("videoDragDropArea");
+      if (videoDragDropArea) {
+        ["dragover", "dragenter"].forEach((event) => {
+          videoDragDropArea.addEventListener(event, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            videoDragDropArea.classList.add("dragover");
+          });
+        });
+        ["dragleave", "drop"].forEach((event) => {
+          videoDragDropArea.addEventListener(event, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            videoDragDropArea.classList.remove("dragover");
+            if (event === "drop") {
+              const files = e.dataTransfer.files;
+              for (let i = 0; i < files.length; i++) {
+                addVideoToCanvas(files[i]);
+              }
+            }
+          });
+        });
+      }
+
+      function startVideoLoop() {
+        function loop() {
+          let active = false;
+          videoObjects.forEach((obj, i) => {
+            if (!videoElements[i].paused && !videoElements[i].ended) {
+              active = true;
+              obj.dirty = true;
+            }
+          });
+          canvas.requestRenderAll();
+          if (active) videoRafId = requestAnimationFrame(loop);
+          else videoRafId = null;
+        }
+        videoRafId = requestAnimationFrame(loop);
+      }
+
+      function updateVideoButtons() {
+        const numVids = videoElements.length;
+        const playBtn = document.getElementById("playButton");
+        const playAllBtn = document.getElementById("playAllButton");
+        const pauseAllBtn = document.getElementById("pauseAllButton");
+        const previewBtn = document.getElementById("previewButton");
+        if (playBtn) playBtn.style.display = numVids > 0 ? "block" : "none";
+        if (playAllBtn)
+          playAllBtn.style.display = numVids > 1 ? "block" : "none";
+        if (pauseAllBtn)
+          pauseAllBtn.style.display = numVids > 1 ? "block" : "none";
+        if (previewBtn)
+          previewBtn.style.display = numVids > 0 ? "block" : "none";
+      }
+
+      function playAll() {
+        videoElements.forEach((v) => v.play().catch(console.error));
+        if (!videoRafId) startVideoLoop();
+      }
+
+      function pauseAll() {
+        videoElements.forEach((v) => v.pause());
+        if (videoRafId) {
+          cancelAnimationFrame(videoRafId);
+          videoRafId = null;
+        }
+      }
+
+      function togglePlay() {
+        const active = canvas.getActiveObject();
+        if (active && active.isVideo) {
+          const idx = videoObjects.indexOf(active);
+          if (idx > -1) {
+            const v = videoElements[idx];
+            if (v.paused) {
+              v.play().catch(console.error);
+              if (!videoRafId) startVideoLoop();
+            } else {
+              v.pause();
+            }
+          }
+        }
+      }
+
+      // Preview
+      function showPreview() {
+        const previewModal = document.getElementById("previewModal");
+        const previewCanvasEl = document.getElementById("previewCanvas");
+        if (!previewModal || !previewCanvasEl) return;
+
+        previewCanvasEl.width = canvas.width;
+        previewCanvasEl.height = canvas.height;
+        const ctx = previewCanvasEl.getContext("2d");
+        const dataUrl = canvas.toDataURL({ format: "png" });
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+        img.src = dataUrl;
+        previewModal.style.display = "block";
+      }
+
+      function closePreview() {
+        const previewModal = document.getElementById("previewModal");
+        if (previewModal) previewModal.style.display = "none";
+      }
+
+      // Copy/Paste/Delete
+      function copySelected() {
+        const obj = canvas.getActiveObject();
+        if (obj) obj.clone((c) => (clipboard = c), ["isVideo"]);
+      }
+
+      function pasteObject() {
+        if (!clipboard) return;
+        clipboard.clone(
+          (cloned) => {
+            cloned.set({ left: cloned.left + 30, top: cloned.top + 30 });
+            if (cloned.type === "activeSelection") {
+              cloned.canvas = canvas;
+              cloned.forEachObject((o) => canvas.add(o));
+            } else {
+              canvas.add(cloned);
+            }
+            canvas.setActiveObject(cloned);
+            canvas.requestRenderAll();
+            saveState();
+          },
+          ["isVideo"]
+        );
+      }
+
+      function deleteSelected() {
+        canvas.getActiveObjects().forEach((o) => {
+          if (o.isVideo) {
+            const idx = videoObjects.indexOf(o);
+            if (idx > -1) {
+              videoElements[idx].pause();
+              URL.revokeObjectURL(videoElements[idx].src);
+              videoElements.splice(idx, 1);
+              videoObjects.splice(idx, 1);
+            }
+          }
+          canvas.remove(o);
+        });
+        canvas.discardActiveObject();
+        canvas.requestRenderAll();
+        saveState();
+        updateVideoButtons();
+        hideTopToolbar();
+      }
+
+      // Menu items
+      function addItemNamePrice() {
+        const top = 10 + canvas.getObjects().length * 15;
+        const name = new fabric.Textbox("Item Name", {
+          left: 20,
+          top,
+          fontSize: 24,
+          width: 250,
+        });
+        const price = new fabric.Textbox("$9.99", {
+          left: 250,
+          top,
+          fontSize: 24,
+          fill: "#e74c3c",
+          textAlign: "right",
+          width: 100,
+        });
+        canvas.add(name, price);
+        canvas.renderAll();
+        saveState();
+      }
+      function addItemNamePriceDesc() {
+        const top = 20 + canvas.getObjects().length * 20;
+        const name = new fabric.Textbox("Item Name", {
+          left: 20,
+          top,
+          fontSize: 24,
+          width: 250,
+        });
+        const price = new fabric.Textbox("$9.99", {
+          left: 250,
+          top,
+          fontSize: 24,
+          fill: "#e74c3c",
+          textAlign: "right",
+          width: 100,
+        });
+        const desc = new fabric.Textbox("Description here...", {
+          left: 20,
+          top: top + 30,
+          fontSize: 16,
+          width: 370,
+          fill: "#7f8c8d",
+        });
+        canvas.add(name, price, desc);
+        canvas.renderAll();
+        saveState();
+      }
+
+      // Save/Load/Download
+      function saveDesign() {
+        const data = JSON.stringify(canvas.toJSON(["isVideo"]));
+        const blob = new Blob([data], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download =
+          (document.getElementById("designName")?.value || "menu") + ".json";
+        a.click();
+      }
+
+      function loadDesign() {
+        const input = document.getElementById("loadJSON");
+        if (input && input.files[0]) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const json = JSON.parse(e.target.result);
+            canvas.loadFromJSON(json, () => {
+              // Re-link videos if saved (note: URLs not saved, reload needed)
+              canvas.renderAll();
+              initHistory();
+              saveState();
+              videoElements = [];
+              videoObjects = [];
+              updateVideoButtons();
+            });
+          };
+          reader.readAsText(input.files[0]);
+        }
+      }
+
+      function downloadMenu() {
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL({ format: "png", multiplier: 2 });
+        a.download = "menu.png";
+        a.click();
+      }
+
+      // Keyboard shortcuts
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Delete") deleteSelected();
+        if (e.key === "Escape") {
+          hideTopToolbar();
+          canvas.discardActiveObject();
+        }
+      });
+
+      // Undo/Redo
+      function undo() {
+        if (historyStep > 0) {
+          historyStep--;
+          canvas.loadFromJSON(JSON.parse(history[historyStep]), () => {
+            canvas.renderAll();
+            // Re-setup videos if needed
+          });
+        }
+      }
+
+      function redo() {
+        if (historyStep < history.length - 1) {
+          historyStep++;
+          canvas.loadFromJSON(JSON.parse(history[historyStep]), () => {
+            canvas.renderAll();
+          });
+        }
+      }
+
+      // Keyboard shortcuts
+      document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+          e.preventDefault();
+          undo();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === "y") {
+          e.preventDefault();
+          redo();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === "c") {
+          e.preventDefault();
+          copySelected();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+          e.preventDefault();
+          pasteObject();
+        }
+        if (e.key === "Delete" || e.key === "Backspace") {
+          e.preventDefault();
+          deleteSelected();
+        }
+        if (e.key === "Escape") {
+          hideTopToolbar();
+          canvas.discardActiveObject();
+        }
+      });
+
+      // Expose functions
+      window.toggleSidebar = toggleSidebar;
+      window.addItemNamePrice = addItemNamePrice;
+      window.addItemNamePriceDesc = addItemNamePriceDesc;
+      window.saveDesign = saveDesign;
+      window.loadDesign = loadDesign;
+      window.downloadMenu = downloadMenu;
+      window.playAll = playAll;
+      window.pauseAll = pauseAll;
+    </script>
+
+    <!-- <script>
+      // === FINAL FIXED SCRIPT - IMAGE & VIDEO AUTO ADD + ALL ERRORS GONE ===
+      let clipboard = null;
+      let history = [];
+      let historyStep = -1;
+      let selectedObjects = [];
+      let currentlyEditingTextbox = null;
+
+      let canvas = new fabric.Canvas("canvas", {
+        width: 800,
+        height: 600,
+        backgroundColor: "#ffffff",
+        selection: true,
+        hoverCursor: "move",
+        preserveObjectStacking: true,
+      });
+
+      // Canvas resize
+      function initCanvas() {
+        const wrapper =
+          document.querySelector(".canvas-wrapper") || document.body;
+        canvas.setWidth(wrapper.clientWidth - 40);
+        canvas.setHeight(wrapper.clientHeight - 40);
+        canvas.renderAll();
+        initHistory();
+      }
+      window.addEventListener("resize", initCanvas);
+      initCanvas();
+
+      // History
+      function saveState() {
+        if (historyStep < history.length - 1)
+          history = history.slice(0, historyStep + 1);
+        history.push(JSON.stringify(canvas.toJSON(["isVideo"])));
+        historyStep++;
+        if (history.length > 50) {
+          history.shift();
+          historyStep--;
+        }
+      }
+      canvas.on("object:added", saveState);
+      canvas.on("object:modified", saveState);
+      canvas.on("object:removed", saveState);
+      canvas.on("object:scaling", saveState);
+      canvas.on("object:rotating", saveState);
+
+      function initHistory() {
+        history = [JSON.stringify(canvas.toJSON(["isVideo"]))];
+        historyStep = 0;
+      }
+
+      // Toggle sidebar
+      function toggleSidebar() {
+        const panel = document.getElementById("editorPanel");
+        const btn = document.getElementById("toggleBtn");
+        if (panel) panel.classList.toggle("hidden");
+        if (btn) btn.classList.toggle("shifted");
+      }
+
+      // Selection handling
+      canvas.on("selection:created", (e) => {
+        selectedObjects = e.selected || [];
+        const texts = selectedObjects.filter((o) => o.type === "textbox");
+        if (texts.length > 1) showMultiTextProperties(texts);
+        else if (selectedObjects.length === 1)
+          showPropertiesModal(selectedObjects[0]);
+      });
+
+      canvas.on("selection:updated", (e) => {
+        selectedObjects = e.selected || [];
+        const texts = selectedObjects.filter((o) => o.type === "textbox");
+        if (texts.length > 1) showMultiTextProperties(texts);
+        else if (selectedObjects.length === 1)
+          showPropertiesModal(selectedObjects[0]);
+        else hidePropertiesModal();
+      });
+
+      canvas.on("selection:cleared", () => {
+        selectedObjects = [];
+        hidePropertiesModal();
+      });
+
+      // Multi-text properties
+      function showMultiTextProperties(texts) {
+        const modal = document.getElementById("propertiesModal");
+        const content = document.getElementById("propertiesContent");
+        const title = document.getElementById("propertiesTitle");
+        if (!modal || !content || !title) return;
+        content.innerHTML = "";
+        title.textContent = `Multi Text (${texts.length})`;
+
+        const w = document.createElement("div");
+        w.style.cssText = "display:grid;gap:12px;";
+
+        const fontSel = document.createElement("select");
+        [
+          "Arial",
+          "Helvetica",
+          "Times New Roman",
+          "Georgia",
+          "Courier New",
+          "Impact",
+          "Roboto",
+        ].forEach((f) => fontSel.add(new Option(f, f)));
+        fontSel.onchange = () => {
+          texts.forEach((t) => t.set("fontFamily", fontSel.value));
+          canvas.requestRenderAll();
+          saveState();
+        };
+        w.appendChild(
+          Object.assign(document.createElement("label"), {
+            textContent: "Font",
+          })
+        );
+        w.appendChild(fontSel);
+
+        const sizeIn = document.createElement("input");
+        sizeIn.type = "number";
+        sizeIn.min = 8;
+        sizeIn.max = 300;
+        sizeIn.oninput = () => {
+          const s = parseInt(sizeIn.value) || 20;
+          texts.forEach((t) => t.set("fontSize", s));
+          canvas.requestRenderAll();
+          saveState();
+        };
+        w.appendChild(
+          Object.assign(document.createElement("label"), {
+            textContent: "Size",
+          })
+        );
+        w.appendChild(sizeIn);
+
+        const colIn = document.createElement("input");
+        colIn.type = "color";
+        colIn.oninput = () => {
+          texts.forEach((t) => t.set("fill", colIn.value));
+          canvas.requestRenderAll();
+          saveState();
+        };
+        w.appendChild(
+          Object.assign(document.createElement("label"), {
+            textContent: "Color",
+          })
+        );
+        w.appendChild(colIn);
+
+        content.appendChild(w);
+        modal.style.display = "block";
+      }
+
+      // Single object properties
+      function showPropertiesModal(obj) {
+        if (currentlyEditingTextbox && currentlyEditingTextbox !== obj)
+          currentlyEditingTextbox.exitEditing();
+        currentlyEditingTextbox = null;
+
+        const modal = document.getElementById("propertiesModal");
+        const content = document.getElementById("propertiesContent");
+        const title = document.getElementById("propertiesTitle");
+        if (!modal || !content || !title) return;
+        content.innerHTML = "";
+        title.textContent =
+          obj.type === "textbox"
+            ? "Text Properties"
+            : obj.isVideo
+            ? "Video Properties"
+            : "Image Properties";
+
+        const w = document.createElement("div");
+        w.style.cssText = "display:grid;gap:8px;";
+
+        const xIn = Object.assign(document.createElement("input"), {
+          type: "number",
+          value: Math.round(obj.left || 0),
+        });
+        xIn.oninput = () => {
+          obj.set("left", parseFloat(xIn.value) || 0);
+          obj.setCoords();
+          canvas.requestRenderAll();
+          saveState();
+        };
+        w.appendChild(
+          Object.assign(document.createElement("label"), { textContent: "X" })
+        );
+        w.appendChild(xIn);
+
+        const yIn = Object.assign(document.createElement("input"), {
+          type: "number",
+          value: Math.round(obj.top || 0),
+        });
+        yIn.oninput = () => {
+          obj.set("top", parseFloat(yIn.value) || 0);
+          obj.setCoords();
+          canvas.requestRenderAll();
+          saveState();
+        };
+        w.appendChild(
+          Object.assign(document.createElement("label"), { textContent: "Y" })
+        );
+        w.appendChild(yIn);
+
+        const widthIn = Object.assign(document.createElement("input"), {
+          type: "number",
+          value: Math.round(obj.width * obj.scaleX),
+        });
+        widthIn.oninput = () => {
+          const val = parseFloat(widthIn.value) || obj.width;
+          obj.scaleX = val / obj.width;
+          obj.setCoords();
+          canvas.requestRenderAll();
+          saveState();
+        };
+        w.appendChild(
+          Object.assign(document.createElement("label"), {
+            textContent: "Width",
+          })
+        );
+        w.appendChild(widthIn);
+
+        const heightIn = Object.assign(document.createElement("input"), {
+          type: "number",
+          value: Math.round(obj.height * obj.scaleY),
+        });
+        heightIn.oninput = () => {
+          const val = parseFloat(heightIn.value) || obj.height;
+          obj.scaleY = val / obj.height;
+          obj.setCoords();
+          canvas.requestRenderAll();
+          saveState();
+        };
+        w.appendChild(
+          Object.assign(document.createElement("label"), {
+            textContent: "Height",
+          })
+        );
+        w.appendChild(heightIn);
+
+        if (obj.type === "textbox") {
+          currentlyEditingTextbox = obj;
+          const ta = document.createElement("textarea");
+          ta.value = obj.text || "";
+          ta.rows = 4;
+          ta.style.width = "100%";
+          ta.oninput = () => {
+            obj.set("text", ta.value);
+            canvas.requestRenderAll();
+            saveState();
+          };
+          ta.onfocus = () => {
+            obj.enterEditing();
+            obj.hiddenTextarea = ta;
+            ta.focus();
+          };
+          w.appendChild(
+            Object.assign(document.createElement("label"), {
+              textContent: "Text",
+            })
+          );
+          w.appendChild(ta);
+
+          const fontSel = document.createElement("select");
+          [
+            "Roboto",
+            "Arial",
+            "Helvetica",
+            "Times New Roman",
+            "Georgia",
+          ].forEach((f) => fontSel.add(new Option(f, f)));
+          fontSel.value = obj.fontFamily || "Roboto";
+          fontSel.onchange = () => {
+            obj.set("fontFamily", fontSel.value);
+            canvas.requestRenderAll();
+            saveState();
+          };
+          w.appendChild(
+            Object.assign(document.createElement("label"), {
+              textContent: "Font Family",
+            })
+          );
+          w.appendChild(fontSel);
+
+          const sizeIn = document.createElement("input");
+          sizeIn.type = "number";
+          sizeIn.min = 8;
+          sizeIn.max = 300;
+          sizeIn.value = obj.fontSize || 20;
+          sizeIn.oninput = () => {
+            obj.set("fontSize", parseInt(sizeIn.value) || 20);
+            canvas.requestRenderAll();
+            saveState();
+          };
+          w.appendChild(
+            Object.assign(document.createElement("label"), {
+              textContent: "Font Size",
+            })
+          );
+          w.appendChild(sizeIn);
+
+          const weightSel = document.createElement("select");
+          ["normal", "bold", "900"].forEach((w) =>
+            weightSel.add(new Option(w, w))
+          );
+          weightSel.value = obj.fontWeight || "normal";
+          weightSel.onchange = () => {
+            obj.set("fontWeight", weightSel.value);
+            canvas.requestRenderAll();
+            saveState();
+          };
+          w.appendChild(
+            Object.assign(document.createElement("label"), {
+              textContent: "Font Weight",
+            })
+          );
+          w.appendChild(weightSel);
+
+          const colIn = document.createElement("input");
+          colIn.type = "color";
+          colIn.value = obj.fill || "#000000";
+          colIn.oninput = () => {
+            obj.set("fill", colIn.value);
+            canvas.requestRenderAll();
+            saveState();
+          };
+          w.appendChild(
+            Object.assign(document.createElement("label"), {
+              textContent: "Text Color",
+            })
+          );
+          w.appendChild(colIn);
+        } else if (obj.isVideo) {
+          const toggleBtn = document.createElement("button");
+          toggleBtn.className = "btn btn-success";
+          toggleBtn.textContent = "Play/Pause";
+          toggleBtn.onclick = () => {
+            const idx = videoObjects.indexOf(obj);
+            if (idx > -1) {
+              const v = videoElements[idx];
+              if (v.paused) {
+                v.play();
+                if (!videoRafId) startVideoLoop();
+              } else {
+                v.pause();
+              }
+            }
+          };
+          w.appendChild(toggleBtn);
+        }
+
+        content.appendChild(w);
+        modal.style.display = "block";
+      }
+
+      function hidePropertiesModal() {
+        const modal = document.getElementById("propertiesModal");
+        if (modal) modal.style.display = "none";
+        if (currentlyEditingTextbox) {
+          currentlyEditingTextbox.exitEditing();
+          currentlyEditingTextbox = null;
+        }
+      }
+
+      canvas.on("text:editing:entered", () => (canvas.selection = false));
+      canvas.on("text:editing:exited", () => (canvas.selection = true));
+
+      // Background
+      function applyBackgroundColor() {
+        const col = document.getElementById("bgColor");
+        if (col)
+          canvas.setBackgroundColor(col.value, canvas.renderAll.bind(canvas));
+      }
+      const bgColEl = document.getElementById("bgColor");
+      if (bgColEl) {
+        bgColEl.addEventListener("input", () => {
+          document.getElementById("bgColorText").value = bgColEl.value;
+          applyBackgroundColor();
+        });
+      }
+
+      const bgImageInput = document.getElementById("bgImage");
+      if (bgImageInput) {
+        bgImageInput.addEventListener("change", function () {
+          if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              fabric.Image.fromURL(e.target.result, (img) => {
+                canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                  scaleX: canvas.width / img.width,
+                  scaleY: canvas.height / img.height,
+                });
+                saveState();
+              });
+            };
+            reader.readAsDataURL(this.files[0]);
+            this.value = "";
+          }
+        });
+      }
+
+      // === IMAGE UPLOAD AUTO TRIGGER FIXED ===
+      function addImageToCanvas(file) {
+        if (file && file.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            fabric.Image.fromURL(e.target.result, (img) => {
+              const maxW = canvas.width * 0.6;
+              const maxH = canvas.height * 0.6;
+              const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+              img.set({
+                left: canvas.width / 2 - (img.width * scale) / 2,
+                top: canvas.height / 2 - (img.height * scale) / 2,
+                scaleX: scale,
+                scaleY: scale,
+                cornerStyle: "circle",
+                borderColor: "#4361ee",
+                cornerColor: "#4361ee",
+              });
+              canvas.add(img);
+              canvas.setActiveObject(img);
+              canvas.requestRenderAll();
+              saveState();
+            });
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      const uploadImageInput = document.getElementById("uploadImage");
+      if (uploadImageInput) {
+        uploadImageInput.addEventListener("change", function () {
+          const files = this.files;
+          for (let i = 0; i < files.length; i++) {
+            addImageToCanvas(files[i]);
+          }
+          this.value = "";
+        });
+      }
+
+      // Image Drag & Drop
+      const dragDropArea = document.getElementById("dragDropArea");
+      if (dragDropArea) {
+        dragDropArea.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          dragDropArea.classList.add("dragover");
+        });
+        dragDropArea.addEventListener("dragleave", () => {
+          dragDropArea.classList.remove("dragover");
+        });
+        dragDropArea.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dragDropArea.classList.remove("dragover");
+          const files = e.dataTransfer.files;
+          for (let i = 0; i < files.length; i++) {
+            addImageToCanvas(files[i]);
+          }
+        });
+      }
+
+      // === VIDEO UPLOAD AUTO TRIGGER FIXED ===
+      let videoElements = [];
+      let videoObjects = [];
+      let videoRafId = null;
+
+      function addVideoToCanvas(file) {
+        if (file && file.type.startsWith("video/")) {
+          const url = URL.createObjectURL(file);
+          const video = document.createElement("video");
+          video.src = url;
+          video.muted = true;
+          video.loop = true;
+          video.autoplay = true;
+          video.setAttribute("playsinline", "");
+          video.crossOrigin = "anonymous";
+
+          video.onloadedmetadata = () => {
+            video.setAttribute("width", video.videoWidth);
+            video.setAttribute("height", video.videoHeight);
+            const maxW = canvas.width * 0.7;
+            const maxH = canvas.height * 0.7;
+            const scale = Math.min(
+              maxW / video.videoWidth,
+              maxH / video.videoHeight,
+              1
+            );
+            const fabricVid = new fabric.Image(video, {
+              left: canvas.width / 2 - (video.videoWidth * scale) / 2,
+              top: canvas.height / 2 - (video.videoHeight * scale) / 2,
+              scaleX: scale,
+              scaleY: scale,
+              objectCaching: false,
+              cornerStyle: "circle",
+              borderColor: "#4361ee",
+              cornerColor: "#4361ee",
+            });
+            fabricVid.isVideo = true;
+            canvas.add(fabricVid);
+            canvas.setActiveObject(fabricVid);
+            canvas.requestRenderAll();
+            saveState();
+
+            videoElements.push(video);
+            videoObjects.push(fabricVid);
+            video.play().catch((e) => console.error("Video play error:", e));
+            if (!videoRafId) startVideoLoop();
+            updateVideoButtons();
+          };
+
+          video.onerror = () => {
+            document.getElementById("videoStatusMessage").textContent =
+              "Error loading video: " + file.name;
+          };
+        }
+      }
+
+      const uploadVideoInput = document.getElementById("uploadVideo");
+      if (uploadVideoInput) {
+        uploadVideoInput.addEventListener("change", function () {
+          const files = this.files;
+          for (let i = 0; i < files.length; i++) {
+            addVideoToCanvas(files[i]);
+          }
+          this.value = "";
+        });
+      }
+
+      // Video Drag & Drop
+      const videoDragDropArea = document.getElementById("videoDragDropArea");
+      if (videoDragDropArea) {
+        videoDragDropArea.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          videoDragDropArea.classList.add("dragover");
+        });
+        videoDragDropArea.addEventListener("dragleave", () => {
+          videoDragDropArea.classList.remove("dragover");
+        });
+        videoDragDropArea.addEventListener("drop", (e) => {
+          e.preventDefault();
+          videoDragDropArea.classList.remove("dragover");
+          const files = e.dataTransfer.files;
+          for (let i = 0; i < files.length; i++) {
+            addVideoToCanvas(files[i]);
+          }
+        });
+      }
+
+      function startVideoLoop() {
+        function loop() {
+          let active = false;
+          videoObjects.forEach((obj, i) => {
+            if (!videoElements[i].paused && !videoElements[i].ended) {
+              active = true;
+              obj.dirty = true;
+            }
+          });
+          canvas.requestRenderAll();
+          if (active) videoRafId = requestAnimationFrame(loop);
+          else videoRafId = null;
+        }
+        videoRafId = requestAnimationFrame(loop);
+      }
+
+      function updateVideoButtons() {
+        const numVids = videoElements.length;
+        document.getElementById("playButton").style.display =
+          numVids > 0 ? "block" : "none";
+        document.getElementById("playAllButton").style.display =
+          numVids > 1 ? "block" : "none";
+        document.getElementById("pauseAllButton").style.display =
+          numVids > 1 ? "block" : "none";
+        document.getElementById("previewButton").style.display =
+          numVids > 0 ? "block" : "none";
+      }
+
+      function playAll() {
+        videoElements.forEach((v) => v.play());
+        if (!videoRafId) startVideoLoop();
+      }
+
+      function pauseAll() {
+        videoElements.forEach((v) => v.pause());
+        if (videoRafId) {
+          cancelAnimationFrame(videoRafId);
+          videoRafId = null;
+        }
+      }
+
+      function togglePlay() {
+        const active = canvas.getActiveObject();
+        if (active && active.isVideo) {
+          const idx = videoObjects.indexOf(active);
+          if (idx > -1) {
+            const v = videoElements[idx];
+            if (v.paused) {
+              v.play();
+              if (!videoRafId) startVideoLoop();
+            } else {
+              v.pause();
+            }
+          }
+        }
+      }
+
+      // Preview (static snapshot with current video frames)
+      function showPreview() {
+        const previewModal = document.getElementById("previewModal");
+        const previewCanvasEl = document.getElementById("previewCanvas");
+        if (!previewModal || !previewCanvasEl) return;
+
+        previewCanvasEl.width = canvas.width;
+        previewCanvasEl.height = canvas.height;
+        const ctx = previewCanvasEl.getContext("2d");
+        const dataUrl = canvas.toDataURL({ format: "png" });
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+        img.src = dataUrl;
+        previewModal.style.display = "block";
+      }
+
+      function closePreview() {
+        const previewModal = document.getElementById("previewModal");
+        if (previewModal) previewModal.style.display = "none";
+      }
+
+      // Copy/Paste
+      function copySelected() {
+        const obj = canvas.getActiveObject();
+        if (obj) obj.clone((c) => (clipboard = c), ["isVideo"]);
+      }
+
+      function pasteObject() {
+        if (!clipboard) return;
+        clipboard.clone(
+          (cloned) => {
+            cloned.set({ left: cloned.left + 30, top: cloned.top + 30 });
+            if (cloned.type === "activeSelection") {
+              cloned.canvas = canvas;
+              cloned.forEachObject((o) => canvas.add(o));
+            } else {
+              canvas.add(cloned);
+            }
+            canvas.setActiveObject(cloned);
+            canvas.requestRenderAll();
+            saveState();
+          },
+          ["isVideo"]
+        );
+      }
+
+      function deleteSelected() {
+        canvas.getActiveObjects().forEach((o) => {
+          if (o.isVideo) {
+            const idx = videoObjects.indexOf(o);
+            if (idx > -1) {
+              videoElements[idx].pause();
+              videoElements.splice(idx, 1);
+              videoObjects.splice(idx, 1);
+            }
+          }
+          canvas.remove(o);
+        });
+        canvas.discardActiveObject();
+        canvas.requestRenderAll();
+        saveState();
+        updateVideoButtons();
+      }
+
+      // Save/Load/Download
+      function saveDesign() {
+        const data = JSON.stringify(canvas.toJSON(["isVideo"]));
+        const blob = new Blob([data], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download =
+          (document.getElementById("designName")?.value || "menu") + ".json";
+        a.click();
+      }
+
+      function loadDesign() {
+        const input = document.getElementById("loadJSON");
+        if (input && input.files[0]) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            canvas.loadFromJSON(JSON.parse(e.target.result), () => {
+              canvas.renderAll();
+              initHistory();
+              saveState();
+            });
+          };
+          reader.readAsText(input.files[0]);
+        }
+      }
+
+      function downloadMenu() {
+        const a = document.createElement("a");
+        a.href = canvas.toDataURL({ format: "png", multiplier: 2 });
+        a.download = "menu.png";
+        a.click();
+      }
+
+      // Menu items
+      function addItemNamePrice() {
+        const top = 100 + canvas.getObjects().length * 50;
+        const name = new fabric.Textbox("Item Name", {
+          left: 80,
+          top,
+          fontSize: 24,
+          width: 250,
+        });
+        const price = new fabric.Textbox("$9.99", {
+          left: 350,
+          top,
+          fontSize: 24,
+          fill: "#e74c3c",
+          textAlign: "right",
+          width: 100,
+        });
+        canvas.add(name, price);
+        canvas.renderAll();
+        saveState();
+      }
+
+      function addItemNamePriceDesc() {
+        const top = 100 + canvas.getObjects().length * 70;
+        const name = new fabric.Textbox("Item Name", {
+          left: 80,
+          top,
+          fontSize: 24,
+          width: 250,
+        });
+        const price = new fabric.Textbox("$9.99", {
+          left: 350,
+          top,
+          fontSize: 24,
+          fill: "#e74c3c",
+          textAlign: "right",
+          width: 100,
+        });
+        const desc = new fabric.Textbox("Description here...", {
+          left: 80,
+          top: top + 30,
+          fontSize: 16,
+          width: 370,
+          fill: "#7f8c8d",
+        });
+        canvas.add(name, price, desc);
+        canvas.renderAll();
+        saveState();
+      }
+
+      // Undo/Redo
+      function undo() {
+        if (historyStep > 0) {
+          historyStep--;
+          canvas.loadFromJSON(
+            JSON.parse(history[historyStep]),
+            canvas.renderAll.bind(canvas)
+          );
+        }
+      }
+
+      function redo() {
+        if (historyStep < history.length - 1) {
+          historyStep++;
+          canvas.loadFromJSON(
+            JSON.parse(history[historyStep]),
+            canvas.renderAll.bind(canvas)
+          );
+        }
+      }
+
+      // Keyboard
+      document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+          e.preventDefault();
+          undo();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === "y") {
+          e.preventDefault();
+          redo();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === "c") {
+          e.preventDefault();
+          copySelected();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+          e.preventDefault();
+          pasteObject();
+        }
+        if (e.key === "Delete") {
+          e.preventDefault();
+          deleteSelected();
+        }
+      });
+
+      // Expose all functions
+      window.toggleSidebar = toggleSidebar;
+      window.addItemNamePrice = addItemNamePrice;
+      window.addItemNamePriceDesc = addItemNamePriceDesc;
+      window.saveDesign = saveDesign;
+      window.loadDesign = loadDesign;
+      window.downloadMenu = downloadMenu;
+      window.hidePropertiesModal = hidePropertiesModal;
+      window.playAll = playAll;
+      window.pauseAll = pauseAll;
+      window.togglePlay = togglePlay;
+      window.showPreview = showPreview;
+      window.closePreview = closePreview;
+    </script> -->
+  </body>
+</html>
